@@ -16,6 +16,8 @@ public class Pit extends Label {
     private boolean isEndZone;
     private Pit next;                               // Reference to the next pit
     private SimpleIntegerProperty numOfSeeds;
+    private Timeline timeline = new Timeline();
+    private boolean isGameOver = false;
 
     public Pit(Player player, Boolean isEndZone) {
 
@@ -35,9 +37,7 @@ public class Pit extends Label {
             this.setCursor(Cursor.CROSSHAIR);
 
             // Sets event handler for clicking on the pit
-            this.setOnMouseClicked(event -> {
-                clickOnPit();
-            });
+            this.setOnMouseClicked(event -> clickOnPit());
         }
 
         // Binds the number of seeds to the label text
@@ -70,7 +70,7 @@ public class Pit extends Label {
             - There MUST be seeds in the pit you click
             - Cannot click if there is already an ongoing move
          */
-        if(!currentlyMoving && this.numOfSeeds.get() != 0 && (autoMoving || this.player == currentPlayer)){
+        if (!currentlyMoving && this.numOfSeeds.get() != 0 && (autoMoving || this.player == currentPlayer) && !isGameOver) {
 
             // Set to prevent more moves before this one is finished
             currentlyMoving = true;
@@ -96,7 +96,7 @@ public class Pit extends Label {
 
                 // Check if pit is opponents end zone
                 if (currentPit.isEndZone) {
-                    if (currentPit.player != Controller.currentPlayer){
+                    if (currentPit.player != Controller.currentPlayer) {
                         currentPit = currentPit.next;                     // Skip this pit if it is
                     }
                 }
@@ -107,41 +107,69 @@ public class Pit extends Label {
             }));
             timeline.play();
 
-            timeline.setOnFinished(e ->{
+            timeline.setOnFinished(e -> {
                 // Check what should happen after the seeds are distributed
                 checkLastPit();
             });
-        }
-        else{
+        } else if (!isGameOver) {
             // Displays this whenever an illigal move is made
             message.set(currentPlayer + " you can't do that right now!");
         }
 
     }
 
-    private void checkLastPit(){
-
+    private void checkLastPit() {
+        if (!autoMoving) {
+            board.checkIfGameOver();
+        }
         currentlyMoving = false;
         autoMoving = false;
 
         // If you land in your own pit you can continue
-        if(currentPit.isEndZone){
-            message.set(currentPlayer + " it is your turn again");
-        }
-        else{
-            // If you land in an empty pit the other player can play
-            if(currentPit.numOfSeeds.get() == 1){
-                Controller.changeCurrentPlayer();
-                message.set(currentPlayer + " it is now your turn!");
-            }
-            else{
-                // AutoMoving is set true, so it is able to take seeds from opponents side
-                autoMoving = true;
-                // Click on the next pit
-                currentPit.clickOnPit();
+        if (!isGameOver) {
+            if (currentPit.isEndZone) {
+                message.set(currentPlayer + " it is your turn again");
+            } else {
+                // If you land in an empty pit the other player can play
+                if (currentPit.numOfSeeds.get() == 1) {
+                    Controller.changeCurrentPlayer();
+                    message.set(currentPlayer + " it is now your turn!");
+                } else {
+                    // AutoMoving is set true, so it is able to take seeds from opponents side
+                    autoMoving = true;
+                    // Click on the next pit
+                    currentPit.clickOnPit();
+                }
             }
         }
 
     }
 
+    public Pit getNext() {
+        return next;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public boolean isEndZone() {
+        return isEndZone;
+    }
+
+    public int getNumOfSeeds() {
+        return numOfSeeds.get();
+    }
+
+    public SimpleIntegerProperty numOfSeedsProperty() {
+        return numOfSeeds;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        isGameOver = gameOver;
+    }
+
+    public void setNumOfSeeds(int numOfSeeds) {
+        this.numOfSeeds.set(numOfSeeds);
+    }
 }

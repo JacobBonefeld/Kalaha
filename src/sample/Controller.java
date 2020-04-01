@@ -3,6 +3,7 @@ package sample;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 
@@ -17,9 +18,9 @@ public class Controller implements Initializable {
     public Label playerLabel;
 
     public static Board board;
-    public static boolean currentlyMoving =  false;
+    public static boolean currentlyMoving = false;
     public static boolean autoMoving = false;
-    public static Player currentPlayer =  Player.PLAYER1;
+    public static Player currentPlayer = Player.PLAYER1;
     public static Pit currentPit;
     public static SimpleStringProperty message = new SimpleStringProperty("Player 1 - Your turn");
 
@@ -30,13 +31,21 @@ public class Controller implements Initializable {
         playerLabel.setStyle("-fx-font-size: 20");
     }
 
-    public static void changeCurrentPlayer(){
-
-        if(currentPlayer == Player.PLAYER1) currentPlayer =  Player.PLAYER2;
+    public static void changeCurrentPlayer() {
+        if (currentPlayer == Player.PLAYER1) currentPlayer = Player.PLAYER2;
         else currentPlayer = Player.PLAYER1;
-
     }
 
+    public static void gameOver() {
+        if (board.bottomPoints > board.topPoints) {
+            message.set("player 1 wins with " + board.bottomPoints + " points");
+        } else if (board.bottomPoints < board.topPoints) {
+            message.set("player 2 wins with " + board.topPoints + " points");
+        } else {
+            message.set("Draw!");
+        }
+
+    }
 
 
 }

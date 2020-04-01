@@ -5,6 +5,8 @@ import javafx.scene.layout.AnchorPane;
 
 public class Board {
 
+    int topPoints=0;
+    int bottomPoints=0;
     public AnchorPane pane;
     public Pit head = null;
     public Pit tail = null;
@@ -77,5 +79,57 @@ public class Board {
         this.add(newPit);
     }
 
+    public boolean checkIfGameOver() {
+        boolean gameIsOver =false;
+        topPoints=0;
+        bottomPoints=0;
+        Pit currentPit = head;
+        if (head != null) {
+            do {
+                if (!currentPit.isEndZone() && currentPit.getPlayer().equals(Player.PLAYER1)) {
+                    bottomPoints += currentPit.getNumOfSeeds();
+                } else if (!currentPit.isEndZone() && currentPit.getPlayer().equals(Player.PLAYER2)) {
+                    topPoints += currentPit.getNumOfSeeds();
+                }
+                currentPit = currentPit.getNext();
+            } while (currentPit != head);
+        }
+        System.out.println(bottomPoints + ":   " + topPoints + ":  ");
+        if (topPoints==0 || bottomPoints==0){
+            System.out.println("GameEnded");
+            gameIsOver = true;
+            stopTheGame();
+        }
+        return gameIsOver;
+    }
 
+    private void stopTheGame() {
+        Pit currentPit = head;
+        if (head != null) {
+            do {
+                if (currentPit.getPlayer()==Player.PLAYER1 && currentPit.isEndZone()){
+                    bottomPoints+= currentPit.getNumOfSeeds();
+                    currentPit.setNumOfSeeds(bottomPoints);
+                } else if ((currentPit.getPlayer()==Player.PLAYER2 && currentPit.isEndZone())){
+                    topPoints += currentPit.getNumOfSeeds();
+                    currentPit.setNumOfSeeds(topPoints);
+                } else{
+                    currentPit.setNumOfSeeds(0);
+                }
+
+
+                currentPit.setGameOver(true);
+                currentPit = currentPit.getNext();
+            } while (currentPit != head);
+        }
+        Controller.gameOver();
+    }
+
+    public int getTopPoints() {
+        return topPoints;
+    }
+
+    public int getBottomPoints() {
+        return bottomPoints;
+    }
 }
